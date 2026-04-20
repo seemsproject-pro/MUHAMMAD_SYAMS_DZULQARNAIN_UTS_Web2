@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="id" class="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | Anamac Komputer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+                    colors: { anamac: { 600: '#2563eb', 700: '#1d4ed8' } }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { scroll-behavior: smooth; -webkit-tap-highlight-color: transparent; }
+        .glass { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(16px); }
+        .dark .glass { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-[#0b1120] text-slate-900 dark:text-slate-100 antialiased transition-colors duration-300">
+
+    <nav class="glass sticky top-0 z-[50] border-b border-slate-200 dark:border-slate-800">
+        <div class="container mx-auto px-4 h-20 flex justify-between items-center">
+            <a href="index.html" class="flex items-center space-x-2 group">
+                <div class="bg-anamac-600 p-2 rounded-2xl shadow-lg shadow-anamac-600/30">
+                    <span class="text-white font-black text-xl uppercase">A</span>
+                </div>
+                <h1 class="text-xl font-black tracking-tighter hidden sm:block uppercase italic">Anamac<span class="text-anamac-600">.</span></h1>
+            </a>
+            
+            <div class="flex items-center space-x-3">
+                <button id="themeToggle" class="p-3 rounded-2xl hover:bg-white dark:hover:bg-slate-800 transition-all">🌙</button>
+                <a href="cart.html" class="text-sm font-bold text-slate-500 hover:text-anamac-600 transition-colors flex items-center gap-2">
+                    <span class="hidden sm:inline">Kembali ke Keranjang</span>
+                    <span class="sm:hidden">← Kembali</span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto px-4 py-8 md:py-12 max-w-6xl">
+        <div class="flex flex-col lg:flex-row gap-10">
+            
+            <div class="flex-1 order-2 lg:order-1">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="w-10 h-10 bg-anamac-600/10 text-anamac-600 rounded-xl flex items-center justify-center font-black">1</div>
+                    <h2 class="text-2xl font-black tracking-tight uppercase">Shipping <span class="text-anamac-600">Info</span></h2>
+                </div>
+
+                <form id="checkoutForm" onsubmit="processCheckout(event)" class="space-y-6">
+                    <div class="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-sm space-y-5">
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Nama Lengkap Penerima</label>
+                            <div class="relative group">
+                                <span class="absolute left-4 top-3.5 text-slate-400">👤</span>
+                                <input type="text" id="orderName" required placeholder="Contoh: Muhammad Syams" 
+                                    class="w-full pl-11 pr-4 py-3.5 rounded-2xl border-none bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-anamac-600 outline-none transition-all text-sm">
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Nomor WhatsApp (Aktif)</label>
+                            <div class="relative group">
+                                <span class="absolute left-4 top-3.5 text-slate-400">📱</span>
+                                <input type="tel" id="orderPhone" required placeholder="0812xxxx" 
+                                    class="w-full pl-11 pr-4 py-3.5 rounded-2xl border-none bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-anamac-600 outline-none transition-all text-sm">
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">Alamat Pengiriman Lengkap</label>
+                            <div class="relative group">
+                                <span class="absolute left-4 top-3.5 text-slate-400">📍</span>
+                                <textarea id="orderAddress" required rows="4" placeholder="Nama Jalan, RT/RW, Kec, Kota..." 
+                                    class="w-full pl-11 pr-4 py-3.5 rounded-2xl border-none bg-slate-50 dark:bg-slate-900 focus:ring-2 focus:ring-anamac-600 outline-none transition-all text-sm leading-relaxed"></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" 
+                        class="w-full bg-anamac-600 text-white font-black py-5 rounded-[2rem] shadow-xl shadow-anamac-600/20 hover:bg-anamac-700 hover:shadow-anamac-600/40 transform active:scale-95 transition-all uppercase text-xs tracking-widest flex items-center justify-center gap-3">
+                        Konfirmasi & Bayar Pesanan
+                        <span class="text-xl">➔</span>
+                    </button>
+                </form>
+            </div>
+
+            <div class="w-full lg:w-[400px] order-1 lg:order-2">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="w-10 h-10 bg-anamac-600/10 text-anamac-600 rounded-xl flex items-center justify-center font-black">2</div>
+                    <h2 class="text-2xl font-black tracking-tight uppercase">Order <span class="text-anamac-600">Summary</span></h2>
+                </div>
+
+                <div class="glass p-8 rounded-[2.5rem] border border-slate-200 dark:border-slate-800 shadow-xl sticky top-28">
+                    <div id="checkoutItems" class="space-y-4 mb-8 max-h-[350px] overflow-y-auto no-scrollbar pr-1">
+                        </div>
+                    
+                    <div class="space-y-4 border-t border-slate-200 dark:border-slate-700 pt-6">
+                        <div class="flex justify-between text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
+                            <span>Subtotal</span>
+                            <span id="subtotalCost">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">
+                            <span>Shipping (Flat)</span>
+                            <span>Rp 25.000</span>
+                        </div>
+                        <div class="pt-4 flex justify-between items-end">
+                            <div class="flex flex-col">
+                                <span class="text-[9px] font-black uppercase text-slate-400 tracking-widest">Grand Total</span>
+                                <span id="totalCost" class="text-2xl font-black text-anamac-600">Rp 0</span>
+                            </div>
+                            <span class="text-[10px] font-bold text-green-500 bg-green-500/10 px-3 py-1 rounded-full uppercase">Pajak Termasuk</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="mt-20 py-12 border-t border-slate-200 dark:border-slate-800 text-center">
+        <p class="text-slate-400 text-[10px] uppercase tracking-[0.2em]">🔒 SSL Encrypted Checkout System v3.0</p>
+    </footer>
+
+    <script>
+        // THEME MANAGER
+        function initTheme() {
+            const btn = document.getElementById('themeToggle');
+            const isDark = localStorage.getItem('theme') === 'dark';
+            if (isDark) document.documentElement.classList.add('dark');
+            if (btn) {
+                btn.innerText = isDark ? '☀️' : '🌙';
+                btn.onclick = () => {
+                    const dark = document.documentElement.classList.toggle('dark');
+                    localStorage.setItem('theme', dark ? 'dark' : 'light');
+                    btn.innerText = dark ? '☀️' : '🌙';
+                };
+            }
+        }
+
+        // CHECKOUT ENGINE
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        let totalBelanja = 0;
+        const ONGKIR = 25000;
+
+        function checkAuthAndCart() {
+            if (cart.length === 0) {
+                alert("Keranjang Anda kosong!");
+                window.location.href = 'index.html';
+                return;
+            }
+            if (!currentUser) {
+                alert("Silakan login terlebih dahulu untuk checkout.");
+                window.location.href = 'login.html';
+                return;
+            } else {
+                document.getElementById('orderName').value = currentUser.name;
+            }
+            renderSummary();
+        }
+
+        function renderSummary() {
+            const itemsContainer = document.getElementById('checkoutItems');
+            itemsContainer.innerHTML = '';
+            
+            cart.forEach(item => {
+                const sub = item.price * item.quantity;
+                totalBelanja += sub;
+                itemsContainer.innerHTML += `
+                    <div class="flex items-center gap-4 bg-white/50 dark:bg-slate-900/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-800">
+                        <img src="${item.image}" class="w-14 h-14 object-cover rounded-xl shadow-sm">
+                        <div class="flex-1">
+                            <h4 class="font-bold text-xs line-clamp-1 dark:text-white uppercase tracking-tight">${item.name}</h4>
+                            <p class="text-[10px] text-slate-500 font-bold">Rp ${Number(item.price).toLocaleString('id-ID')} x ${item.quantity}</p>
+                        </div>
+                        <span class="font-black text-xs text-anamac-600">Rp ${sub.toLocaleString('id-ID')}</span>
+                    </div>
+                `;
+            });
+
+            document.getElementById('subtotalCost').innerText = `Rp ${totalBelanja.toLocaleString('id-ID')}`;
+            document.getElementById('totalCost').innerText = `Rp ${(totalBelanja + ONGKIR).toLocaleString('id-ID')}`;
+        }
+
+        function processCheckout(e) {
+            e.preventDefault();
+            
+            const transactionId = "INV-" + Date.now();
+            const newOrder = {
+                id: transactionId,
+                userId: currentUser.email,
+                customerName: document.getElementById('orderName').value,
+                phone: document.getElementById('orderPhone').value,
+                address: document.getElementById('orderAddress').value,
+                items: cart,
+                total: totalBelanja + ONGKIR,
+                date: new Date().toLocaleString('id-ID'),
+                status: 'Diproses'
+            };
+
+            let orders = JSON.parse(localStorage.getItem('orders')) || [];
+            orders.push(newOrder);
+            localStorage.setItem('orders', JSON.stringify(orders));
+            localStorage.removeItem('cart'); // Clear cart setelah sukses
+
+            // Sweet Custom Alert Simulation
+            alert(`Pemesanan Berhasil! Invoice: ${transactionId}`);
+            window.location.href = 'history.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initTheme();
+            checkAuthAndCart();
+        });
+    </script>
+</body>
+</html>

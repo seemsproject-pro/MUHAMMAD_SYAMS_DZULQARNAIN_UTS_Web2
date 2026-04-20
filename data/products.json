@@ -1,0 +1,9 @@
+[
+  { "id": 1, "name": "Tablet Xiaomi + Stylus & Cover", "price": 4500000, "category": "Tablet", "image": "https://placehold.co/400x300/e2e8f0/1e293b?text=Xiaomi+Tablet", "description": "Tablet performa tinggi, lengkap dengan stylus." },
+  { "id": 2, "name": "Laptop Gaming RTX Series", "price": 15500000, "category": "Laptop", "image": "https://placehold.co/400x300/e2e8f0/1e293b?text=Gaming+Laptop", "description": "Laptop tangguh memberikan frame rate maksimal." },
+  { "id": 3, "name": "Smart TV 4K 50-Inch", "price": 5200000, "category": "Televisi", "image": "https://placehold.co/400x300/e2e8f0/1e293b?text=Smart+TV", "description": "TV pintar resolusi 4K untuk pengalaman sinematik." },
+  { "id": 4, "name": "Headphone Wireless ANC", "price": 1200000, "category": "Aksesoris", "image": "https://placehold.co/400x300/e2e8f0/1e293b?text=Headphone", "description": "Nikmati musik tanpa gangguan suara bising dari luar." },
+  { "id": 5, "name": "MacBook Air M2", "price": 18000000, "category": "Laptop", "image": "https://placehold.co/400x300/e2e8f0/1e293b?text=MacBook+Air", "description": "Laptop ultra tipis dengan performa chip M2 yang efisien." },
+  { "id": 6, "name": "iPad Pro 11-Inch", "price": 14500000, "category": "Tablet", "image": "https://placehold.co/400x300/e2e8f0/1e293b?text=iPad+Pro", "description": "Kanvas digital terbaik untuk para profesional kreatif." },
+  { "id": 7, "name": "Monitor Ultrawide 34-Inch", "price": 6500000, "category": "Aksesoris", "image": "https://placehold.co/400x300/e2e8f0/1e293b?text=Ultrawide+Monitor", "description": "Ruang kerja super luas untuk kebutuhan multitasking." }
+]
