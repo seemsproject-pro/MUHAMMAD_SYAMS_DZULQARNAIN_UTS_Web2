@@ -1,4 +1,6 @@
-// STATE & DATA
+// ==========================================
+// 1. STATE & DATA INITIALIZATION
+// ==========================================
 let products = [];
 let cart = JSON.parse(localStorage.getItem('cart')) || [];
 let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
@@ -7,7 +9,7 @@ let currentPage = 1;
 const itemsPerPage = 8;
 let currentDisplayData = [];
 
-// DATA INITIALIZATION
+// AWAL MUASAL DATA
 async function fetchProducts() {
     let localData = JSON.parse(localStorage.getItem('products'));
     if (!localData || localData.length === 0) {
@@ -15,16 +17,21 @@ async function fetchProducts() {
             const res = await fetch('data/products.json');
             localData = await res.json();
             localStorage.setItem('products', JSON.stringify(localData));
-        } catch (e) { console.error("Database Error"); }
+        } catch (e) { 
+            console.error("Gagal load database. Pastikan folder data/products.json ada."); 
+        }
     }
     products = localData;
     currentDisplayData = [...products];
     displayPage(1);
     updateUIStats();
+    renderRecentReviews();
     checkAuthUI();
 }
 
-// RENDER PRODUCTS
+// ==========================================
+// 2. RENDER ENGINE (GRID UTAMA)
+// ==========================================
 function renderProducts(items) {
     const grid = document.getElementById('product-grid');
     if (!grid) return;
@@ -60,26 +67,45 @@ function renderProducts(items) {
     });
 }
 
-// DUAL SIDEBAR LOGIC
+// ==========================================
+// 3. LOGIKA DUAL SIDEBAR (SINKRON CLASS)
+// ==========================================
+
 function toggleWishlistSidebar() {
-    closeAllSidebars();
     const drawer = document.getElementById('wishlistDrawer');
     const overlay = document.getElementById('sidebarOverlay');
+    
+    // Pastikan sidebar detail tutup dulu
+    const detailDrawer = document.getElementById('detailDrawer');
+    if (detailDrawer) detailDrawer.classList.add('translate-x-full');
+
     overlay.classList.remove('hidden');
-    setTimeout(() => overlay.classList.add('opacity-100'), 10);
-    drawer.classList.remove('-translate-x-full');
+    setTimeout(() => {
+        overlay.classList.add('opacity-100');
+        drawer.classList.remove('-translate-x-full');
+        drawer.classList.add('translate-x-0');
+    }, 10);
+    
     document.body.style.overflow = 'hidden';
     renderWishlistInDrawer();
 }
 
 function toggleDetailSidebar(productId) {
-    closeAllSidebars();
     const drawer = document.getElementById('detailDrawer');
     const overlay = document.getElementById('sidebarOverlay');
     const p = products.find(x => x.id === productId);
+
+    // Pastikan wishlist tutup dulu
+    const wishDrawer = document.getElementById('wishlistDrawer');
+    if (wishDrawer) wishDrawer.classList.add('-translate-x-full');
+
     overlay.classList.remove('hidden');
-    setTimeout(() => overlay.classList.add('opacity-100'), 10);
-    drawer.classList.remove('translate-x-full');
+    setTimeout(() => {
+        overlay.classList.add('opacity-100');
+        drawer.classList.remove('translate-x-full');
+        drawer.classList.add('translate-x-0');
+    }, 10);
+
     document.body.style.overflow = 'hidden';
     renderDetailInDrawer(p);
 }
@@ -88,29 +114,47 @@ function closeAllSidebars() {
     const left = document.getElementById('wishlistDrawer');
     const right = document.getElementById('detailDrawer');
     const overlay = document.getElementById('sidebarOverlay');
-    if(left) left.classList.add('-translate-x-full');
-    if(right) right.classList.add('translate-x-full');
-    if(overlay) {
-        overlay.classList.remove('opacity-100');
-        setTimeout(() => overlay.classList.add('hidden'), 300);
+
+    if (left) {
+        left.classList.remove('translate-x-0');
+        left.classList.add('-translate-x-full');
     }
-    document.body.style.overflow = 'auto';
+    if (right) {
+        right.classList.remove('translate-x-0');
+        right.classList.add('translate-x-full');
+    }
+
+    overlay.classList.remove('opacity-100');
+    setTimeout(() => {
+        overlay.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }, 300);
 }
 
-function closeSidebar() { closeAllSidebars(); } // Fallback for HTML buttons
+// Alias buat tombol di HTML
+function closeSidebar() { closeAllSidebars(); }
+
+// ==========================================
+// 4. RENDERER KONTEN SIDEBAR
+// ==========================================
 
 function renderWishlistInDrawer() {
     const container = document.getElementById('wishlistContent');
     const wished = products.filter(p => wishlist.includes(p.id));
+    
     container.innerHTML = wished.length ? wished.map(p => `
-        <div class="flex items-center gap-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-3xl border dark:border-slate-700 mb-4">
-            <img src="${p.image}" class="w-16 h-16 object-cover rounded-2xl shadow-sm">
-            <div class="flex-1"><h4 class="font-bold text-sm line-clamp-1">${p.name}</h4><p class="text-anamac-600 font-black text-xs">Rp ${p.price.toLocaleString('id-ID')}</p></div>
-            <button onclick="toggleWishlist(${p.id}, true)" class="text-red-500 p-2 hover:bg-red-50 rounded-xl">✕</button>
-        </div>`).join('') : '<div class="text-center py-20 opacity-20"><span class="text-6xl">❤️</span><p class="font-bold mt-4">Wishlist Kosong</p></div>';
+        <div class="flex items-center gap-4 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-3xl border border-slate-100 dark:border-slate-700 mb-4 shadow-sm">
+            <img src="${p.image}" class="w-16 h-16 object-cover rounded-2xl">
+            <div class="flex-1">
+                <h4 class="font-bold text-sm line-clamp-1">${p.name}</h4>
+                <p class="text-anamac-600 font-black text-xs">Rp ${p.price.toLocaleString('id-ID')}</p>
+            </div>
+            <button onclick="toggleWishlist(${p.id}, true)" class="text-red-500 p-2 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-xl">✕</button>
+        </div>`).join('') : '<div class="text-center py-20 opacity-20"><span class="text-6xl">❤️</span><p class="font-bold mt-4 uppercase tracking-widest">Wishlist Kosong</p></div>';
 }
 
 function renderDetailInDrawer(p) {
+    if (!p) return;
     const content = document.getElementById('detailContent');
     const formArea = document.getElementById('reviewFormArea');
     const allReviews = JSON.parse(localStorage.getItem('productReviews')) || {};
@@ -121,19 +165,24 @@ function renderDetailInDrawer(p) {
         <div class="space-y-6">
             <img src="${p.image}" class="w-full rounded-[2.5rem] shadow-xl border dark:border-slate-800">
             <div class="px-2">
-                <span class="text-[10px] font-black uppercase text-anamac-600">${p.category}</span>
-                <h3 class="text-2xl font-black mt-1">${p.name}</h3>
+                <span class="text-[10px] font-black uppercase text-anamac-600 tracking-widest bg-anamac-600/10 px-3 py-1 rounded-full">${p.category}</span>
+                <h3 class="text-2xl font-black leading-tight mt-3 dark:text-white">${p.name}</h3>
                 <p class="text-2xl font-black text-slate-900 dark:text-white mt-2">Rp ${p.price.toLocaleString('id-ID')}</p>
-                <p class="text-sm text-slate-500 mt-4 leading-relaxed">${p.description}</p>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-4 leading-relaxed">${p.description}</p>
             </div>
             <div class="pt-6 px-2">
-                <h4 class="font-black text-xs uppercase mb-4 border-b dark:border-slate-800 pb-2">Ulasan (${reviews.length})</h4>
+                <h4 class="font-black text-xs uppercase tracking-widest mb-4 border-b dark:border-slate-800 pb-2 flex justify-between">
+                    <span>Ulasan (${reviews.length})</span>
+                </h4>
                 <div class="space-y-4">
                     ${reviews.length ? reviews.map(r => `
-                        <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-3xl border dark:border-slate-700 text-xs italic">
-                            <div class="flex justify-between mb-1"><span class="font-bold text-anamac-600">${r.userName}</span><span>${'⭐'.repeat(r.rating)}</span></div>
-                            <p>"${r.comment}"</p>
-                        </div>`).join('') : '<p class="text-center opacity-40 py-10 text-xs">Belum ada ulasan.</p>'}
+                        <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-3xl border dark:border-slate-700 text-xs">
+                            <div class="flex justify-between mb-1">
+                                <span class="font-bold text-anamac-600 uppercase">${r.userName}</span>
+                                <span class="text-yellow-500">${'⭐'.repeat(r.rating)}</span>
+                            </div>
+                            <p class="italic text-slate-600 dark:text-slate-300 leading-relaxed">"${r.comment}"</p>
+                        </div>`).join('') : '<p class="text-center opacity-40 py-10 text-xs italic">Belum ada ulasan untuk hardware ini.</p>'}
                 </div>
             </div>
         </div>`;
@@ -142,18 +191,23 @@ function renderDetailInDrawer(p) {
     if (user) {
         formArea.innerHTML = `
             <div class="space-y-4">
-                <div class="flex gap-2 justify-center text-2xl">${[1,2,3,4,5].map(n => `<button onclick="submitReview(${p.id}, ${n})" class="hover:scale-125 transition-all">⭐</button>`).join('')}</div>
+                <div class="flex gap-2 justify-center text-2xl">
+                    ${[1,2,3,4,5].map(n => `<button onclick="submitReview(${p.id}, ${n})" class="hover:scale-125 transition-all active:scale-90">⭐</button>`).join('')}
+                </div>
                 <div class="flex gap-2">
-                    <input type="text" id="reviewInput" placeholder="Komentar..." class="flex-1 p-3 rounded-2xl border-none bg-white dark:bg-slate-700 focus:ring-2 focus:ring-anamac-600 text-sm">
-                    <button onclick="submitReview(${p.id}, 5)" class="bg-anamac-600 text-white px-4 rounded-2xl font-bold text-xs uppercase shadow-lg">Kirim</button>
+                    <input type="text" id="reviewInput" placeholder="Tulis komentar..." class="flex-1 p-3 rounded-2xl border-none bg-white dark:bg-slate-700 focus:ring-2 focus:ring-anamac-600 text-sm shadow-sm outline-none">
+                    <button onclick="submitReview(${p.id}, 5)" class="bg-anamac-600 text-white px-5 rounded-2xl font-bold text-xs uppercase shadow-lg hover:bg-anamac-700 transition-all">Kirim</button>
                 </div>
             </div>`;
     } else {
-        formArea.innerHTML = `<p class="text-center text-[10px] text-slate-500 italic uppercase">Login untuk memberi ulasan.</p>`;
+        formArea.innerHTML = `<p class="text-center text-[10px] text-slate-500 italic uppercase tracking-wider">Silakan <a href="login.html" class="text-anamac-600 font-bold underline">Login</a> untuk memberi ulasan.</p>`;
     }
 }
 
-// PROTEKSI LOGIN CART
+// ==========================================
+// 5. CORE BUSINESS LOGIC (CART, WISH, REVIEW)
+// ==========================================
+
 function addToCart(id) {
     const user = JSON.parse(localStorage.getItem('currentUser'));
     if (!user) {
@@ -166,50 +220,66 @@ function addToCart(id) {
     existing ? existing.quantity++ : cart.push({...p, quantity: 1});
     localStorage.setItem('cart', JSON.stringify(cart));
     updateUIStats();
-    showToast(`🛒 ${p.name} Masuk Keranjang!`);
+    showToast(`🛒 ${p.name} ditambahkan!`);
 }
 
 function toggleWishlist(id, fromDrawer = false) {
     const idx = wishlist.indexOf(id);
-    idx === -1 ? wishlist.push(id) : wishlist.splice(idx, 1);
+    if (idx === -1) {
+        wishlist.push(id);
+        showToast("Ditambah ke Wishlist ❤️");
+    } else {
+        wishlist.splice(idx, 1);
+        showToast("Dihapus dari Wishlist 💔");
+    }
     localStorage.setItem('wishlist', JSON.stringify(wishlist));
     updateUIStats();
     displayPage(currentPage);
     if (fromDrawer) renderWishlistInDrawer();
-    showToast(idx === -1 ? "Ditambah ❤️" : "Dihapus 💔");
 }
 
 function submitReview(productId, rating) {
-    const user = JSON.parse(localStorage.getItem('currentUser'));
     const comment = document.getElementById('reviewInput')?.value || "Barang mantap!";
+    const user = JSON.parse(localStorage.getItem('currentUser'));
+    
     let allReviews = JSON.parse(localStorage.getItem('productReviews')) || {};
     if (!allReviews[productId]) allReviews[productId] = [];
-    allReviews[productId].push({ userName: user.name, rating, comment, date: new Date().toLocaleDateString('id-ID') });
+    
+    allReviews[productId].push({ 
+        userName: user.name, 
+        rating, 
+        comment, 
+        date: new Date().toLocaleDateString('id-ID') 
+    });
+    
     localStorage.setItem('productReviews', JSON.stringify(allReviews));
-    showToast("Rating Terkirim! ⭐");
+    showToast("Terima kasih ulasannya! ⭐");
     toggleDetailSidebar(productId); 
     displayPage(currentPage);
 }
 
-// UTILS
+// ==========================================
+// 6. UTILITIES (PAGINATION, FILTER, UI)
+// ==========================================
+
 function updateUIStats() {
-    const w = document.getElementById('wishCount'), c = document.getElementById('cartCount');
+    const w = document.getElementById('wishCount');
+    const c = document.getElementById('cartCount');
     if(w) w.innerText = wishlist.length;
     if(c) c.innerText = cart.reduce((s, i) => s + i.quantity, 0);
-}
-
-function checkAuthUI() {
-    const user = JSON.parse(localStorage.getItem('currentUser'));
-    const area = document.getElementById('authArea');
-    if (user && area) area.innerHTML = `<div class="flex items-center gap-2 bg-white dark:bg-slate-800 p-1.5 pr-4 rounded-2xl border dark:border-slate-700 shadow-sm"><div class="w-8 h-8 bg-anamac-600 rounded-xl flex items-center justify-center text-white font-bold text-xs uppercase">${user.name[0]}</div><span class="text-xs font-bold hidden md:block">${user.name.split(' ')[0]}</span></div>`;
 }
 
 function showToast(msg) {
     const old = document.getElementById('customToast'); if(old) old.remove();
     const t = document.createElement('div');
     t.id = 'customToast';
-    t.className = 'fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-8 py-4 rounded-full shadow-2xl z-[100] font-black text-[10px] uppercase tracking-widest animate-bounce border border-slate-700';
-    t.innerText = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 3000);
+    t.className = 'fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-8 py-4 rounded-full shadow-2xl z-[100] font-black text-[10px] uppercase tracking-[0.2em] animate-bounce border border-white/20';
+    t.innerText = msg;
+    document.body.appendChild(t);
+    setTimeout(() => {
+        t.style.opacity = '0';
+        setTimeout(() => t.remove(), 500);
+    }, 2500);
 }
 
 function displayPage(page) {
@@ -221,11 +291,14 @@ function displayPage(page) {
 
 function renderPagination() {
     const container = document.getElementById('pagination-controls');
+    if (!container) return;
     const total = Math.ceil(currentDisplayData.length / itemsPerPage);
-    if(!container) return; container.innerHTML = ''; if (total <= 1) return;
+    container.innerHTML = '';
+    if (total <= 1) return;
     for (let i = 1; i <= total; i++) {
-        const btn = document.createElement('button'); btn.innerText = i;
-        btn.className = `w-12 h-12 rounded-2xl font-bold transition-all ${currentPage === i ? 'bg-anamac-600 text-white shadow-lg' : 'bg-white dark:bg-slate-800 text-slate-400'}`;
+        const btn = document.createElement('button');
+        btn.innerText = i;
+        btn.className = `w-12 h-12 rounded-2xl font-bold transition-all ${currentPage === i ? 'bg-anamac-600 text-white shadow-lg shadow-anamac-600/30 scale-110' : 'bg-white dark:bg-slate-800 text-slate-400 hover:bg-slate-100'}`;
         btn.onclick = () => { displayPage(i); window.scrollTo({top: 400, behavior: 'smooth'}); };
         container.appendChild(btn);
     }
@@ -235,23 +308,67 @@ function filterCategory(cat) {
     currentCategory = cat;
     document.querySelectorAll('.filter-btn').forEach(b => {
         const match = b.innerText === (cat === 'All' ? 'Semua' : cat);
-        b.className = `filter-btn ${match ? 'active bg-anamac-600 text-white' : 'text-slate-400'} px-6 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap`;
+        b.className = `filter-btn ${match ? 'active bg-anamac-600 text-white shadow-lg' : 'text-slate-400'} px-6 py-2.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap`;
     });
     currentDisplayData = cat === 'All' ? products : products.filter(p => p.category === cat);
     displayPage(1);
 }
 
-// INIT
+function checkAuthUI() {
+    const user = JSON.parse(localStorage.getItem('currentUser'));
+    const area = document.getElementById('authArea');
+    if (user && area) {
+        area.innerHTML = `
+            <div class="flex items-center gap-2 bg-white dark:bg-slate-800 p-1.5 pr-4 rounded-2xl border dark:border-slate-700 shadow-sm">
+                <div class="w-8 h-8 bg-anamac-600 rounded-xl flex items-center justify-center text-white font-bold text-xs uppercase">${user.name[0]}</div>
+                <span class="text-xs font-bold hidden md:block dark:text-white">${user.name.split(' ')[0]}</span>
+            </div>`;
+    }
+}
+
+function renderRecentReviews() {
+    const container = document.getElementById('recentReviews');
+    if (!container) return;
+    const all = JSON.parse(localStorage.getItem('productReviews')) || {};
+    let flattened = [];
+    Object.keys(all).forEach(id => { all[id].forEach(r => flattened.push({...r})); });
+    flattened.sort((a,b) => new Date(b.date) - new Date(a.date));
+    const slice = flattened.slice(0, 3);
+    if (slice.length) {
+        container.innerHTML = slice.map(r => `
+            <div class="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border dark:border-slate-700 text-[10px] mb-3">
+                <div class="flex justify-between mb-1"><strong class="text-anamac-600 uppercase">${r.userName}</strong><span>${'⭐'.repeat(r.rating)}</span></div>
+                <p class="text-slate-500 italic line-clamp-2">"${r.comment}"</p>
+            </div>`).join('');
+    }
+}
+
+// ==========================================
+// 7. GLOBAL INIT
+// ==========================================
 document.addEventListener('DOMContentLoaded', () => {
+    // Sync Theme
     if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
-    document.getElementById('themeToggle').onclick = () => {
-        const dark = document.documentElement.classList.toggle('dark');
-        localStorage.setItem('theme', dark ? 'dark' : 'light');
-    };
+    const themeBtn = document.getElementById('themeToggle');
+    if (themeBtn) {
+        themeBtn.onclick = () => {
+            const dark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', dark ? 'dark' : 'light');
+        };
+    }
+
     fetchProducts();
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-        const k = e.target.value.toLowerCase();
-        currentDisplayData = products.filter(p => p.name.toLowerCase().includes(k) && (currentCategory === 'All' || p.category === currentCategory));
-        displayPage(1);
-    });
+
+    // Search Real-time
+    const search = document.getElementById('searchInput');
+    if (search) {
+        search.addEventListener('input', (e) => {
+            const k = e.target.value.toLowerCase();
+            currentDisplayData = products.filter(p => 
+                p.name.toLowerCase().includes(k) && 
+                (currentCategory === 'All' || p.category === currentCategory)
+            );
+            displayPage(1);
+        });
+    }
 });
